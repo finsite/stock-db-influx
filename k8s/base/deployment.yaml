@@ -1,0 +1,22 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stock-db-influx
+  labels:
+    app: stock-db-influx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stock-db-influx
+  template:
+    metadata:
+      labels:
+        app: stock-db-influx
+    spec:
+      containers:
+      - name: stock-db-influx
+        image: stock-db-influx:latest
+        ports:
+        - containerPort: 8080
