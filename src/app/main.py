@@ -1,15 +1,13 @@
 """Entry point for stock-db-influx writer service."""
+
 import sys
 import time
 
-from app.config import (
-    get_environment,
-    get_poller_name,
-    get_polling_interval,
-)
 from utils.setup_logger import setup_logger
-from app.queue_handler import consume_messages
+
+from app.config import get_environment, get_poller_name, get_polling_interval
 from app.db_writer import write_batch_to_influx
+from app.queue_handler import consume_messages
 
 logger = setup_logger(__name__)
 

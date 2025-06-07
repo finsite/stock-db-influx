@@ -1,20 +1,19 @@
 """Writes processed analysis data to InfluxDB 2.x with batching and retries."""
 
 from typing import Any
-from datetime import datetime
 
 from influxdb_client.client.influxdb_client import InfluxDBClient
-from influxdb_client.client.write_api import SYNCHRONOUS, WriteApi
 from influxdb_client.client.write.point import Point
+from influxdb_client.client.write_api import SYNCHRONOUS, WriteApi
 from influxdb_client.domain.write_precision import WritePrecision
-from tenacity import retry, wait_fixed, stop_after_attempt, retry_if_exception_type
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 from app.config import (
-    get_influxdb_url,
-    get_influxdb_token,
-    get_influxdb_org,
     get_influxdb_bucket,
     get_influxdb_measurement,
+    get_influxdb_org,
+    get_influxdb_token,
+    get_influxdb_url,
 )
 from app.utils.setup_logger import setup_logger
 

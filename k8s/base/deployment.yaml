@@ -16,7 +16,7 @@ spec:
         app: stock-db-influx
     spec:
       containers:
-      - name: stock-db-influx
-        image: stock-db-influx:latest
-        ports:
-        - containerPort: 8080
+        - name: stock-db-influx
+          image: stock-db-influx:latest
+          ports:
+            - containerPort: 8080

@@ -1,14 +1,15 @@
 """Generic queue handler for RabbitMQ or SQS with batching, retries, and flush timeout."""
+
 import json
-import time
 import signal
 import threading
-from typing import Callable, Any
+import time
+from collections.abc import Callable
+from typing import Any
 
 import boto3
 import pika
 from botocore.exceptions import BotoCoreError, NoCredentialsError
-from pika.exceptions import AMQPConnectionError
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app import config
@@ -80,7 +81,9 @@ def _start_rabbitmq_listener(callback):
                 callback(payload)
                 for _, delivery_tag in message_batch:
                     ch.basic_ack(delivery_tag=delivery_tag)
-                logger.info("✅ Processed and acknowledged %d RabbitMQ messages", len(message_batch))
+                logger.info(
+                    "✅ Processed and acknowledged %d RabbitMQ messages", len(message_batch)
+                )
             except Exception:
                 logger.exception("❌ Batch processing failed, NACKing all messages")
                 for _, delivery_tag in message_batch:
