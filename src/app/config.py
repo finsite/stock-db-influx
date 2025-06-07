@@ -171,3 +171,15 @@ def get_influxdb_org() -> str:
 def get_influxdb_bucket() -> str:
     """Return the InfluxDB bucket to write data to."""
     return get_config_value("INFLUXDB_BUCKET", "my-bucket")
+
+def get_influxdb_measurement() -> str:
+    """Return the measurement name used for InfluxDB points."""
+    return get_config_value("INFLUXDB_MEASUREMENT", "stock_data")
+
+# ---------------------------------------------------------------------
+# 🔁 Batching Flush Timeout
+# ---------------------------------------------------------------------
+
+def get_flush_timeout() -> int:
+    """Maximum time in seconds to wait before flushing partial batches."""
+    return int(get_config_value("FLUSH_TIMEOUT", "5"))
