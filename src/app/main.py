@@ -1,62 +1,33 @@
-"""Entry point for stock-db-influx writer service."""
+"""Main entry point for the service.
 
+This script initializes logging, loads the queue consumer,
+and begins consuming data using the configured processing callback.
+"""
+
+import os
 import sys
-import time
 
-from utils.setup_logger import setup_logger
+# Add 'src/' to Python's module search path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from app.config import get_environment, get_poller_name, get_polling_interval
-from app.db_writer import write_batch_to_influx
+from app.utils.setup_logger import setup_logger
 from app.queue_handler import consume_messages
+from app.output_handler import send_to_output
 
+# Initialize the module-level logger
 logger = setup_logger(__name__)
 
 
-def process_batch(batch: list[dict]) -> None:
-    """Callback to process and write a batch of messages to InfluxDB."""
-    if not batch:
-        logger.warning("⚠️ Received empty batch — skipping.")
-        return
-
-    logger.info("📦 Received batch of %d messages", len(batch))
-
-    try:
-        write_batch_to_influx(batch)
-        logger.info("✅ Successfully wrote batch to InfluxDB.")
-    except Exception as e:
-        logger.exception("❌ Failed to write batch to InfluxDB: %s", e)
-        raise
-
-
 def main() -> None:
-    logger.info("🚀 Starting stock-db-influx writer service...")
-    logger.info(f"🌍 Environment: {get_environment()}")
-    logger.info(f"📛 Poller Name: {get_poller_name()}")
-    logger.info(f"⏱ Polling Interval: {get_polling_interval()}s")
+    """Starts the data processing service.
 
-    try:
-        consume_messages(callback=process_batch)
-    except KeyboardInterrupt:
-        logger.info("🛑 Graceful shutdown requested via keyboard interrupt.")
-        sys.exit(0)
-    except Exception as e:
-        logger.exception("❌ Unhandled exception in main(): %s", e)
-        raise
+    This function initializes the service by calling the queue consumer,
+    which will begin listening to RabbitMQ or SQS and processing data
+    using the `send_to_output` callback.
+    """
+    logger.info("🚀 Starting processing service...")
+    consume_messages(send_to_output)
 
 
 if __name__ == "__main__":
-    restart_attempts = 0
-
-    while True:
-        try:
-            main()
-            logger.warning("⚠️ main() exited unexpectedly. Restarting...")
-        except Exception as e:
-            restart_attempts += 1
-            logger.error("🔁 Restart #%d due to failure: %s", restart_attempts, e)
-
-            if restart_attempts >= 5:
-                logger.critical("🚨 Too many failures — exiting.")
-                sys.exit(1)
-
-            time.sleep(5)
+    main()
