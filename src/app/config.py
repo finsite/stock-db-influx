@@ -1,192 +1,67 @@
-"""Configuration module for polling services.
+"""Repo-specific configuration for stock-db-influx."""
 
-Provides typed getter functions to retrieve configuration values from
-Vault, environment variables, or defaults — in that order.
-"""
-
-import os
-
-from app.utils.vault_client import VaultClient
-
-# Initialize and cache Vault client
-_vault = VaultClient()
-
-
-def get_config_value(key: str, default: str | None = None) -> str:
-    """Retrieve a configuration value from Vault, environment variable, or default.
-
-    Args:
-        key (str): The configuration key to retrieve.
-        default (Optional[str]): Fallback value if the key is missing.
-
-    Returns:
-        str: The resolved configuration value.
-
-    Raises:
-        ValueError: If the key is missing and no default is provided.
-
-    """
-    val = _vault.get(key, os.getenv(key))
-    if val is None:
-        if default is not None:
-            return str(default)
-        raise ValueError(f"❌ Missing required config for key: {key}")
-    return str(val)
-
-
-# ------------------------------------------------------------------------------
-# 🌍 General Environment
-# ------------------------------------------------------------------------------
-
-
-def get_environment() -> str:
-    """Return the current runtime environment (e.g., 'dev', 'prod')."""
-    return get_config_value("ENVIRONMENT", "dev")
+from app.config_shared import *
 
 
 def get_poller_name() -> str:
-    """Return the poller's name."""
-    return get_config_value("POLLER_NAME", "stock_tech_ichimoku")
-
-
-# ------------------------------------------------------------------------------
-# 🔁 Polling and Runtime Behavior
-# ------------------------------------------------------------------------------
-
-
-def get_polling_interval() -> int:
-    """Polling interval in seconds between data fetch cycles."""
-    return int(get_config_value("POLLING_INTERVAL", "60"))
-
-
-def get_batch_size() -> int:
-    """Number of items or messages to process in each batch."""
-    return int(get_config_value("BATCH_SIZE", "10"))
-
-
-def get_rate_limit() -> int:
-    """Maximum number of requests per second (0 = unlimited)."""
-    return int(get_config_value("RATE_LIMIT", "0"))
-
-
-def get_output_mode() -> str:
-    """Output mode: 'queue' to publish, 'log' for debug output."""
-    return get_config_value("OUTPUT_MODE", "queue")
-
-
-# ------------------------------------------------------------------------------
-# 📬 Queue Type
-# ------------------------------------------------------------------------------
-
-
-def get_queue_type() -> str:
-    """Queue system in use: 'rabbitmq' or 'sqs'."""
-    return get_config_value("QUEUE_TYPE", "rabbitmq")
-
-
-# ------------------------------------------------------------------------------
-# 🐇 RabbitMQ Configuration
-# ------------------------------------------------------------------------------
-
-
-def get_rabbitmq_host() -> str:
-    """Hostname of the RabbitMQ broker."""
-    return get_config_value("RABBITMQ_HOST", "localhost")
-
-
-def get_rabbitmq_port() -> int:
-    """Port number for RabbitMQ connection."""
-    return int(get_config_value("RABBITMQ_PORT", "5672"))
-
-
-def get_rabbitmq_vhost() -> str:
-    """Virtual host used for RabbitMQ connection."""
-    vhost = get_config_value("RABBITMQ_VHOST")
-    if not vhost:
-        raise ValueError("❌ Missing required config: RABBITMQ_VHOST must be set.")
-    return vhost
-
-
-def get_rabbitmq_user() -> str:
-    """Username for RabbitMQ authentication."""
-    return get_config_value("RABBITMQ_USER", "")
-
-
-def get_rabbitmq_password() -> str:
-    """Password for RabbitMQ authentication."""
-    return get_config_value("RABBITMQ_PASS", "")
-
-
-def get_rabbitmq_exchange() -> str:
-    """Exchange name to publish to or consume from."""
-    return get_config_value("RABBITMQ_EXCHANGE", "stock_data_exchange")
-
-
-def get_rabbitmq_routing_key() -> str:
-    """Routing key used for message delivery in RabbitMQ."""
-    return get_config_value("RABBITMQ_ROUTING_KEY", "stock_data")
+    """Return the name of the poller for this service."""
+    return get_config_value("POLLER_NAME", "stock_db_influx")
 
 
 def get_rabbitmq_queue() -> str:
-    """RabbitMQ queue name."""
-    return get_config_value("RABBITMQ_QUEUE", "stock_tech_ichimoku_queue")
+    """Return the RabbitMQ queue name for this poller."""
+    return get_config_value("RABBITMQ_QUEUE", "stock_db_influx_queue")
 
 
 def get_dlq_name() -> str:
-    """Dead-letter queue name."""
-    return get_config_value("DLQ_NAME", "stock_tech_ichimoku_dlq")
+    """Return the Dead Letter Queue (DLQ) name for this poller."""
+    return get_config_value("DLQ_NAME", "stock_db_influx_dlq")
 
+"""Repo-specific configuration for stock-db-influx."""
 
-# ------------------------------------------------------------------------------
-# 📦 Amazon SQS Configuration
-# ------------------------------------------------------------------------------
-
-
-def get_sqs_queue_url() -> str:
-    """Full URL of the SQS queue."""
-    return get_config_value("SQS_QUEUE_URL", "")
-
-
-def get_sqs_region() -> str:
-    """AWS region of the SQS queue."""
-    return get_config_value("SQS_REGION", "us-east-1")
-
-
-# ------------------------------------------------------------------------------
-# 📊 InfluxDB Configuration
-# ------------------------------------------------------------------------------
-
-
-def get_influxdb_url() -> str:
-    """Return the base URL for the InfluxDB instance."""
-    return get_config_value("INFLUXDB_URL", "http://localhost:8086")
-
-
-def get_influxdb_token() -> str:
-    """Return the InfluxDB access token."""
-    return get_config_value("INFLUXDB_TOKEN", "my-token")
-
-
-def get_influxdb_org() -> str:
-    """Return the InfluxDB organization name."""
-    return get_config_value("INFLUXDB_ORG", "my-org")
+from app.config_shared import *
 
 
 def get_influxdb_bucket() -> str:
-    """Return the InfluxDB bucket to write data to."""
-    return get_config_value("INFLUXDB_BUCKET", "my-bucket")
+    """Return the InfluxDB bucket name to write data into.
+
+    Returns:
+        str: The bucket name from config or default.
+    """
+    return get_config_value("INFLUXDB_BUCKET", "poller_data")
 
 
 def get_influxdb_measurement() -> str:
-    """Return the measurement name used for InfluxDB points."""
-    return get_config_value("INFLUXDB_MEASUREMENT", "stock_data")
+    """Return the InfluxDB measurement name used in this service.
+
+    Returns:
+        str: The measurement name from config or default.
+    """
+    return get_config_value("INFLUXDB_MEASUREMENT", "stock_prices")
 
 
-# ---------------------------------------------------------------------
-# 🔁 Batching Flush Timeout
-# ---------------------------------------------------------------------
+def get_influxdb_org() -> str:
+    """Return the InfluxDB organization name.
+
+    Returns:
+        str: The organization name from config or default.
+    """
+    return get_config_value("INFLUXDB_ORG", "default_org")
 
 
-def get_flush_timeout() -> int:
-    """Maximum time in seconds to wait before flushing partial batches."""
-    return int(get_config_value("FLUSH_TIMEOUT", "5"))
+def get_influxdb_token() -> str:
+    """Return the token used to authenticate to InfluxDB.
+
+    Returns:
+        str: The token from Vault or environment variable.
+    """
+    return get_secret_or_env("INFLUXDB_TOKEN")
+
+
+def get_influxdb_url() -> str:
+    """Return the base URL of the InfluxDB server.
+
+    Returns:
+        str: The URL from config or default.
+    """
+    return get_config_value("INFLUXDB_URL", "http://localhost:8086")
