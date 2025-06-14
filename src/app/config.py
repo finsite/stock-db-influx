@@ -17,6 +17,7 @@ def get_dlq_name() -> str:
     """Return the Dead Letter Queue (DLQ) name for this poller."""
     return get_config_value("DLQ_NAME", "stock_db_influx_dlq")
 
+
 """Repo-specific configuration for stock-db-influx."""
 
 from app.config_shared import *
@@ -27,6 +28,7 @@ def get_influxdb_bucket() -> str:
 
     Returns:
         str: The bucket name from config or default.
+
     """
     return get_config_value("INFLUXDB_BUCKET", "poller_data")
 
@@ -36,6 +38,7 @@ def get_influxdb_measurement() -> str:
 
     Returns:
         str: The measurement name from config or default.
+
     """
     return get_config_value("INFLUXDB_MEASUREMENT", "stock_prices")
 
@@ -45,6 +48,7 @@ def get_influxdb_org() -> str:
 
     Returns:
         str: The organization name from config or default.
+
     """
     return get_config_value("INFLUXDB_ORG", "default_org")
 
@@ -54,6 +58,7 @@ def get_influxdb_token() -> str:
 
     Returns:
         str: The token from Vault or environment variable.
+
     """
     return get_secret_or_env("INFLUXDB_TOKEN")
 
@@ -63,5 +68,6 @@ def get_influxdb_url() -> str:
 
     Returns:
         str: The URL from config or default.
+
     """
     return get_config_value("INFLUXDB_URL", "http://localhost:8086")
