@@ -11,7 +11,7 @@ botocore==1.40.6
     #   -r requirements.in
     #   boto3
     #   s3transfer
-certifi==2025.8.3
+certifi==2026.5.20
     # via
     #   influxdb-client
     #   requests
@@ -37,7 +37,7 @@ python-dateutil==2.9.0.post0
     # via
     #   botocore
     #   influxdb-client
-python-json-logger==3.3.0
+python-json-logger==4.1.0
     # via -r requirements.in
 reactivex==4.0.4
     # via influxdb-client
